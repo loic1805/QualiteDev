@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/loic1805/QualiteDev'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'make clean && make all'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                echo '🐳 Construction de l’image Docker...'
+                sh 'docker build -t bubblesort-c:latest .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                echo '🚀 Exécution du conteneur Docker...'
+                sh 'echo "5 4 3 2 1" | docker run --rm -i bubblesort-c:latest'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline Docker terminé avec succès.'
+        }
+        failure {
+            echo '❌ Erreur dans le pipeline Docker.'
+        }
+    }
+}
